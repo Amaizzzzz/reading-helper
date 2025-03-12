@@ -31,22 +31,22 @@ const AIChatSection: React.FC<AIChatSectionProps> = ({ onSendMessage }) => {
   };
 
   const suggestions = [
-    { text: '这个词的具体用法是什么？', icon: '💭' },
-    { text: '可以给我更多例句吗？', icon: '📝' },
-    { text: '如何记忆这个词？', icon: '🧠' },
-    { text: '相似词有哪些？', icon: '🔄' }
+    { text: 'What are the specific uses of this word?', icon: '💭' },
+    { text: 'Can you give me more example sentences?', icon: '📝' },
+    { text: 'How can I memorize this word?', icon: '🧠' },
+    { text: 'What are similar words?', icon: '🔄' }
   ];
 
   return (
     <div className="ai-chat-section">
       <div className="section-title">
         <span className="text-3xl">🤖</span>
-        <span>AI 学习助手</span>
+        <span>AI Learning Assistant</span>
       </div>
 
       <div className="bg-white/50 rounded-xl p-6 space-y-4">
         <p className="text-gray-600">
-          你可以问我任何关于这段内容的问题，比如：
+          You can ask me any questions about this content, such as:
         </p>
         <div className="flex flex-wrap gap-3">
           {suggestions.map((suggestion, index) => (
@@ -60,7 +60,7 @@ const AIChatSection: React.FC<AIChatSectionProps> = ({ onSendMessage }) => {
             >
               <span className="text-xl mr-2">{suggestion.icon}</span>
               {suggestion.text}
-              <div className="tooltip">点击快速提问</div>
+              <div className="tooltip">Click for quick questions</div>
             </button>
           ))}
         </div>
@@ -77,7 +77,7 @@ const AIChatSection: React.FC<AIChatSectionProps> = ({ onSendMessage }) => {
               formRef.current?.requestSubmit();
             }
           }}
-          placeholder="输入你的问题，按 Enter 发送，Shift + Enter 换行..."
+          placeholder="Enter your question, press Enter to send, Shift + Enter for new line..."
           className="input-base min-h-[60px] max-h-[200px] py-4 pr-[100px]"
           disabled={isTyping}
         />
@@ -89,12 +89,12 @@ const AIChatSection: React.FC<AIChatSectionProps> = ({ onSendMessage }) => {
           {isTyping ? (
             <>
               <span className="animate-spin text-xl mr-2">⏳</span>
-              处理中
+              Processing
             </>
           ) : (
             <>
               <span className="text-xl">📤</span>
-              <span>发送</span>
+              <span>Send</span>
             </>
           )}
         </button>

@@ -27,9 +27,9 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
   }, [text]);
 
   const levels = [
-    { title: '基础释义', content: '简单的解释...' },
-    { title: '详细解释', content: '更详细的解释...' },
-    { title: '专业释义', content: '专业领域的解释...' }
+    { title: 'Basic Definition', content: 'Simple explanation...' },
+    { title: 'Detailed Explanation', content: 'More detailed explanation...' },
+    { title: 'Technical Definition', content: 'Technical field explanation...' }
   ];
 
   return (
@@ -62,7 +62,7 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
       </div>
 
       <div className="border-t border-gray-100 pt-4">
-        <div className="text-sm text-gray-500 mb-2">相关词汇：</div>
+        <div className="text-sm text-gray-500 mb-2">Related Words:</div>
         <div className="flex flex-wrap gap-2">
           {relatedWords.map((word, index) => (
             <div key={index} className="related-word">

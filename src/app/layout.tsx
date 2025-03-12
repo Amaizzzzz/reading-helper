@@ -7,8 +7,8 @@ import { SettingsProvider } from '../contexts/SettingsContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: '语境学习助手',
-  description: '智能语言学习辅助工具',
+  title: 'Context Learning Assistant',
+  description: 'Intelligent Language Learning Tool',
 };
 
 export default function RootLayout({

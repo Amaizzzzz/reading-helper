@@ -46,33 +46,33 @@ const SettingsPanel: React.FC = () => {
                    focus:outline-none focus:ring-2 focus:ring-blue-500/30"
       />
       <div className="flex justify-between text-xs text-gray-400 mt-1 px-1">
-        <span>初学者</span>
-        <span>专家</span>
+        <span>Beginner</span>
+        <span>Expert</span>
       </div>
     </div>
   );
 
   return (
     <div className="grid grid-cols-2 gap-6">
-      {/* 语言技能设置 */}
+      {/* Language Skills Settings */}
       <div className="space-y-6">
-        {renderSkillSlider('readingLevel', '阅读能力', '📚')}
-        {renderSkillSlider('listeningLevel', '听力理解', '👂')}
+        {renderSkillSlider('readingLevel', 'Reading Level', '📚')}
+        {renderSkillSlider('listeningLevel', 'Listening Comprehension', '👂')}
       </div>
       <div className="space-y-6">
-        {renderSkillSlider('speakingLevel', '口语表达', '🗣')}
-        {renderSkillSlider('writingLevel', '写作能力', '✍️')}
+        {renderSkillSlider('speakingLevel', 'Speaking', '🗣')}
+        {renderSkillSlider('writingLevel', 'Writing', '✍️')}
       </div>
 
-      {/* 翻译密度设置 */}
+      {/* Translation Density Settings */}
       <div className="col-span-2 pt-4 border-t border-gray-100">
-        {renderSkillSlider('translationDensity', '翻译提示密度', '🔍')}
+        {renderSkillSlider('translationDensity', 'Translation Hint Density', '🔍')}
         <p className="mt-2 text-xs text-gray-500">
-          提示：调整此选项可以控制需要翻译和解释的文本数量
+          Tip: Adjust this option to control the amount of text that needs translation and explanation
         </p>
       </div>
 
-      {/* 保存按钮 */}
+      {/* Save Button */}
       <button
         className="col-span-2 py-2.5 px-4 bg-gradient-to-r from-blue-500 to-blue-600
                    hover:from-blue-600 hover:to-blue-700
@@ -80,11 +80,11 @@ const SettingsPanel: React.FC = () => {
                    shadow-sm hover:shadow transition-all
                    focus:outline-none focus:ring-2 focus:ring-blue-500/30"
         onClick={() => {
-          // TODO: 保存设置到本地存储或后端
+          // TODO: Save settings to local storage or backend
           console.log('Settings saved:', localSettings);
         }}
       >
-        保存设置
+        Save Settings
       </button>
     </div>
   );

@@ -15,7 +15,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [message, setMessage] = useState('');
   const [flashcards, setFlashcards] = useState([
-    { front: 'Example Word', back: '示例词语', isFlipped: false },
+    { front: 'Example Word', back: 'Example Translation', isFlipped: false },
   ]);
 
   const handleDifficultyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className="w-full space-y-6">
       {/* Learning Adjustment Panel */}
       <div className="mac-card p-6">
-        <h2 className="text-lg font-medium text-blue-500 mb-8">学习辅助调节</h2>
+        <h2 className="text-lg font-medium text-blue-500 mb-8">Learning Assistance</h2>
         
         <div className="space-y-8">
           <div>
