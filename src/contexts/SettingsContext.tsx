@@ -9,7 +9,9 @@ const defaultSettings: ReadingSettings = {
   preferredLevels: ['basic', 'intermediate'],
   autoShowContext: false,
   fontSize: 16,
-  theme: 'light'
+  theme: 'light',
+  hintLevel: 50,
+  translationDetail: 50
 };
 
 const defaultUserPreferences: UserPreferences = {

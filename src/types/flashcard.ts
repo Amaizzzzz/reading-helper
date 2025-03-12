@@ -27,4 +27,6 @@ interface StudyProgress {
   history: StudySession[];
 }
 
-export type { FlashcardData, StudySession, StudyProgress }; 
+export type { FlashcardData, StudySession, StudyProgress };
+
+console.log('Page rendering...', { settings }); 

@@ -180,13 +180,9 @@ const ReadingSection: React.FC<ReadingSectionProps> = ({ title, content, article
 
       {showPopup && currentTranslation && (
         <TranslationPopup
-          word={selectedText}
-          translation={currentTranslation}
+          text={selectedText}
           position={popupPosition}
           onClose={() => setShowPopup(false)}
-          initialLevel={settings.preferredLevels[0]}
-          autoShowContext={settings.autoShowContext}
-          difficulty={settings.maxDifficulty}
         />
       )}
     </div>

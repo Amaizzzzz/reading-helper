@@ -2,7 +2,6 @@
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gz
 
 # testing
 /coverage
@@ -13,16 +12,10 @@
 
 # production
 /build
-/dist
 
 # misc
 .DS_Store
 *.pem
-.env*.local
-.env
-.env.development
-.env.test
-.env.production
 
 # debug
 npm-debug.log*

@@ -18,66 +18,58 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
   position,
   onClose,
 }) => {
-  const [translation, setTranslation] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState<number>(0);
+  const [relatedWords, setRelatedWords] = useState<string[]>([]);
 
   useEffect(() => {
-    // 模拟翻译API调用
-    setTranslation(`"${text}" 的翻译`);
-    setSuggestions([
-      '📚 词义解释',
-      '🔤 相关词汇',
-      '📝 例句',
-      '💡 记忆技巧'
-    ]);
+    // Simulate API call for related words
+    setRelatedWords(['similar', 'synonym', 'related', 'word']);
   }, [text]);
+
+  const levels = [
+    { title: '基础释义', content: '简单的解释...' },
+    { title: '详细解释', content: '更详细的解释...' },
+    { title: '专业释义', content: '专业领域的解释...' }
+  ];
 
   return (
     <div
-      className="fixed z-50 w-80"
+      className="translation-popup"
       style={{
         left: `${position.x}px`,
-        top: `${position.y + 10}px`
+        top: `${position.y + 10}px`,
+        transform: 'translateX(-50%)'
       }}
     >
-      <div className="mac-card p-4 space-y-4">
-        {/* 关闭按钮 */}
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600"
-        >
+      <div className="flex justify-between items-center mb-3">
+        <div className="word">{text}</div>
+        <button onClick={onClose} className="close-btn">
           ✕
         </button>
+      </div>
 
-        {/* 翻译内容 */}
-        <div>
-          <div className="text-sm text-gray-500 mb-1">选中文本：</div>
-          <div className="font-medium text-gray-800">{text}</div>
-          <div className="text-blue-600 mt-2">{translation}</div>
-        </div>
+      <div className="translation-levels space-y-2 mb-4">
+        {levels.map((level, index) => (
+          <div
+            key={index}
+            className={`level-item ${selectedLevel === index ? 'active' : ''}`}
+            onClick={() => setSelectedLevel(index)}
+          >
+            <div className="text-sm font-medium">{level.title}</div>
+            <div className="text-xs text-gray-500">{level.content}</div>
+          </div>
+        ))}
+      </div>
 
-        {/* 学习建议 */}
-        <div className="grid grid-cols-2 gap-2">
-          {suggestions.map((suggestion, index) => (
-            <button
-              key={index}
-              className="p-2 text-sm text-gray-600 bg-gray-50 rounded-lg
-                         hover:bg-blue-50 hover:text-blue-600 transition-colors
-                         flex items-center justify-center space-x-2"
-            >
-              {suggestion}
-            </button>
+      <div className="border-t border-gray-100 pt-4">
+        <div className="text-sm text-gray-500 mb-2">相关词汇：</div>
+        <div className="flex flex-wrap gap-2">
+          {relatedWords.map((word, index) => (
+            <div key={index} className="related-word">
+              {word}
+            </div>
           ))}
         </div>
-
-        {/* 添加到生词本 */}
-        <button
-          className="w-full p-2 text-sm bg-blue-50 text-blue-600 rounded-lg
-                     hover:bg-blue-100 transition-colors flex items-center justify-center space-x-2"
-        >
-          <span>📖</span>
-          <span>添加到生词本</span>
-        </button>
       </div>
     </div>
   );

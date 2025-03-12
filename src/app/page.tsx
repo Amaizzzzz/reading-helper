@@ -2,30 +2,17 @@
 
 import React, { useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
-import TranslationPopup from './components/TranslationPopup';
+import ReadingSection from './components/ReadingSection';
 
 export default function Home() {
   const { settings, updateSettings } = useSettings();
-  const [selectedText, setSelectedText] = useState('');
-  const [showTranslation, setShowTranslation] = useState(false);
-  const [translationPosition, setTranslationPosition] = useState({ x: 0, y: 0 });
   const [userInput, setUserInput] = useState('');
   const [aiMessages, setAiMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([
     { role: 'assistant', content: '有什么我可以帮你理解的吗？' }
   ]);
 
-  const handleTextSelection = (e: React.MouseEvent<HTMLDivElement>) => {
-    const text = window.getSelection()?.toString();
-    if (text) {
-      setSelectedText(text);
-      setTranslationPosition({ x: e.pageX, y: e.pageY });
-      setShowTranslation(true);
-    }
-  };
-
   const handleSendMessage = () => {
     if (!userInput.trim()) return;
-    
     setAiMessages(prev => [
       ...prev,
       { role: 'user', content: userInput },
@@ -35,87 +22,121 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left Section - 3/4 width */}
-      <div className="w-3/4 bg-gray-50 min-h-screen p-8 overflow-auto">
-        {/* Text Input Area */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <span>📝</span>
-            <span>输入学习内容</span>
-          </h2>
-          <textarea
-            className="w-full h-40 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            placeholder="在这里粘贴或输入要学习的文本..."
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-[1200px] mx-auto">
+          <h1 className="text-2xl font-bold p-4">语境学习助手</h1>
+          <div className="border-b border-gray-200">
+            <nav className="flex px-4 pb-2 space-x-6">
+              <a href="#" className="text-blue-600 border-b-2 border-blue-600 pb-2">首页</a>
+              <a href="#" className="text-gray-600 hover:text-blue-600">我的学习</a>
+              <a href="#" className="text-gray-600 hover:text-blue-600">错题集</a>
+              <a href="#" className="text-gray-600 hover:text-blue-600">设置</a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="max-w-[1200px] mx-auto flex min-h-[calc(100vh-120px)]">
+        {/* Left Panel */}
+        <div className="flex-1 min-w-0 bg-white border-r border-gray-200 p-6">
+          <ReadingSection
+            title="学习内容"
+            content=""
+            articleId="default"
           />
         </div>
 
-        {/* Reading Area */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="prose max-w-none" onMouseUp={handleTextSelection}>
-            <p className="mb-4">
-              近年来，人工智能技术的<span className="highlight">飞速发展</span>引起了全球范围内的广泛关注。
-              从语言模型到计算机视觉，从自动驾驶到医疗诊断，人工智能正在各个领域展现出<span className="highlight">前所未有</span>的潜力。
-            </p>
-            <p className="mb-4">
-              大型语言模型（LLMs）的<span className="highlight">出现</span>使机器能够理解和生成人类语言，
-              这为人机交互带来了革命性的变化。
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Section - 1/4 width */}
-      <div className="w-1/4 bg-white border-l border-gray-200 min-h-screen flex flex-col">
-        <div className="p-6 flex-1">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <span>🤖</span>
-            <span>AI助手</span>
-          </h2>
-          <div className="flex flex-col h-[calc(100%-4rem)]">
-            <div className="flex-1 overflow-y-auto mb-4 space-y-3">
-              {aiMessages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3 rounded-xl ${
-                    msg.role === 'assistant'
-                      ? 'bg-gray-50'
-                      : 'bg-blue-50 ml-auto'
-                  } max-w-[80%] ${
-                    msg.role === 'user' ? 'ml-auto' : ''
-                  }`}
-                >
-                  <p className="text-sm">{msg.content}</p>
+        {/* Right Panel */}
+        <div className="w-[320px] bg-white">
+          <div className="p-6 space-y-6">
+            {/* Learning Settings */}
+            <div>
+              <h3 className="text-lg font-medium mb-4">学习辅助调节</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-2 text-sm text-gray-600">
+                    <span>提示级别</span>
+                    <span>低 - 高</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={settings.hintLevel}
+                    onChange={(e) => updateSettings({ ...settings, hintLevel: Number(e.target.value) })}
+                    className="w-full accent-blue-600"
+                  />
                 </div>
-              ))}
+                <div>
+                  <div className="flex justify-between mb-2 text-sm text-gray-600">
+                    <span>翻译详细度</span>
+                    <span>简洁 - 详细</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={settings.translationDetail}
+                    onChange={(e) => updateSettings({ ...settings, translationDetail: Number(e.target.value) })}
+                    className="w-full accent-blue-600"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2 p-4 border-t border-gray-100 bg-white">
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="输入问题..."
-                className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              />
-              <button
-                onClick={handleSendMessage}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                发送
-              </button>
+
+            {/* Flashcards */}
+            <div>
+              <h3 className="text-lg font-medium mb-4">我的错题集</h3>
+              <div className="space-y-2">
+                <div className="p-2 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer">
+                  前所未有
+                </div>
+                <div className="p-2 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer">
+                  滥用
+                </div>
+              </div>
+            </div>
+
+            {/* AI Chat */}
+            <div>
+              <h3 className="text-lg font-medium mb-4">AI语言助手</h3>
+              <div className="space-y-4">
+                <div className="h-[240px] overflow-y-auto space-y-2 border border-gray-100 rounded-lg p-4 bg-gray-50">
+                  {aiMessages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-2 rounded ${
+                        msg.role === 'assistant' ? 'bg-white' : 'bg-blue-50 ml-auto'
+                      } max-w-[80%]`}
+                    >
+                      {msg.content}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    placeholder="输入问题..."
+                    className="flex-1 p-2 border border-gray-300 rounded"
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    发送
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {showTranslation && (
-        <TranslationPopup
-          text={selectedText}
-          position={translationPosition}
-          onClose={() => setShowTranslation(false)}
-        />
-      )}
     </div>
   );
 } 
