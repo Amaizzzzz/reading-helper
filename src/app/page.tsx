@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
-import ReadingSection from './components/ReadingSection';
+import InteractiveReader from './components/InteractiveReader';
 
 export default function Home() {
   const { settings, updateSettings } = useSettings();
@@ -26,12 +26,12 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-[1200px] mx-auto">
-          <h1 className="text-2xl font-bold p-4">Context Learning Assistant</h1>
+          <h1 className="text-2xl font-bold p-4">AIReader+</h1>
           <div className="border-b border-gray-200">
             <nav className="flex px-4 pb-2 space-x-6">
               <a href="#" className="text-blue-600 border-b-2 border-blue-600 pb-2">Home</a>
-              <a href="#" className="text-gray-600 hover:text-blue-600">My Learning</a>
-              <a href="#" className="text-gray-600 hover:text-blue-600">Review List</a>
+              <a href="#" className="text-gray-600 hover:text-blue-600">Reading List</a>
+              <a href="#" className="text-gray-600 hover:text-blue-600">Saved Notes</a>
               <a href="#" className="text-gray-600 hover:text-blue-600">Settings</a>
             </nav>
           </div>
@@ -42,7 +42,7 @@ export default function Home() {
       <div className="max-w-[1200px] mx-auto flex min-h-[calc(100vh-120px)]">
         {/* Left Panel */}
         <div className="flex-1 min-w-0 bg-white border-r border-gray-200 p-6">
-          <ReadingSection
+          <InteractiveReader
             title="Learning Content"
             content=""
             articleId="default"

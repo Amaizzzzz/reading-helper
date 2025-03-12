@@ -11,13 +11,13 @@ interface Section {
   content: string;
 }
 
-interface ReadingSectionProps {
+interface InteractiveReaderProps {
   title: string;
   content: string;
   articleId: string;
 }
 
-const ReadingSection: React.FC<ReadingSectionProps> = ({ title, content, articleId }) => {
+const InteractiveReader: React.FC<InteractiveReaderProps> = ({ title, content, articleId }) => {
   const { settings, userPreferences, updateLastPosition } = useSettings();
   const [selectedText, setSelectedText] = useState('');
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
@@ -234,4 +234,4 @@ const ReadingSection: React.FC<ReadingSectionProps> = ({ title, content, article
   );
 };
 
-export default ReadingSection; 
+export default InteractiveReader; 

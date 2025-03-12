@@ -7,8 +7,8 @@ import { SettingsProvider } from '../contexts/SettingsContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Context Learning Assistant',
-  description: 'Intelligent Language Learning Tool',
+  title: 'AIReader+',
+  description: 'AI-powered reading assistant for enhanced text understanding',
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh">
+    <html lang="en">
       <body className={inter.className}>
         <SettingsProvider>
           {children}
