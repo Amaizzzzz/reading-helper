@@ -50,22 +50,14 @@ Keep explanations appropriate for the user's level.`;
     const aiResponse = parseAIResponse(completion.choices[0].message.content || '');
     
     // Create flashcards from related words
-    const flashcards = aiResponse.relatedWords?.map(word => ({
-      word,
-      translation: {
-        basic: { translation: "To be translated", examples: [] },
-        intermediate: { translation: "To be translated", examples: [] },
-        advanced: { translation: "To be translated", examples: [] }
-      },
+    const flashcards = (aiResponse.suggestedFlashcards || []).map(card => ({
+      ...card,
       dateAdded: new Date().toISOString(),
       lastReviewed: null,
-      nextReview: new Date().toISOString(),
-      repetitionStage: 0,
-      correctStreak: 0,
-      incorrectStreak: 0,
-      examples: [],
-      notes: ''
-    })) || [];
+      nextReview: null,
+      reviewCount: 0,
+      difficulty: 3, // Start with medium difficulty
+    }));
 
     return createMessage('assistant', aiResponse.explanation || '', {
       grammarPoints: aiResponse.grammarPoints,

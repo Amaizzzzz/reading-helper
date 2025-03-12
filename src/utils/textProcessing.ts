@@ -4,104 +4,115 @@ const mockTranslations: { [key: string]: TranslationEntry } = {
   'journey': {
     word: 'journey',
     context: 'Represents a continuous process in the context of language learning',
+    translation: {
+      basic: {
+        translation: 'A trip or travel from one place to another',
+        examples: [
+          'The journey to success is often challenging.',
+          'They embarked on a long journey across the country.'
+        ]
+      },
+      detailed: {
+        translation: 'An act of traveling from one place to another, especially when involving a considerable distance or time',
+        examples: [
+          'Life is a journey, not a destination.',
+          'The spacecraft completed its journey to Mars.'
+        ],
+        notes: [
+          'Often used metaphorically to describe personal growth or progress'
+        ]
+      },
+      technical: {
+        translation: 'A passage or progress from one stage to another',
+        examples: [
+          'The customer journey in digital marketing',
+          'The hero\'s journey in literature'
+        ],
+        domain: 'business, literature'
+      }
+    },
     suggestions: {
       vocabulary: [
-        'Related words: trip (short travel), voyage (sea journey), expedition (exploration)',
-        'Word forms: journeyed (past tense), journeying (present participle)',
-        'Synonyms: travel, venture, quest, odyssey'
+        'voyage',
+        'expedition',
+        'trek',
+        'odyssey'
       ],
       grammar: [
-        'As a noun: embark on a journey',
-        'As a verb: to journey through life',
-        'Common phrases: life journey, spiritual journey, learning journey'
+        'Used as a countable noun',
+        'Can be used with prepositions: on/in/through a journey'
       ],
       usage: [
-        'Life metaphor: Life is a journey, not a destination',
-        'Learning process: The journey of learning never ends',
-        'Personal growth: My journey of self-discovery'
+        'Often used metaphorically',
+        'Common in both formal and informal contexts'
       ],
       memory: [
-        'Memory tip: jour (French "day") + ney, daily journey',
-        'Association: Life is like a journey, full of unknowns and adventures',
-        'Scene memory: Imagine yourself on a memorable journey'
+        'Think of "jour" (French for "day") - a journey was historically the distance one could travel in a day',
+        'Associate with the phrase "life\'s journey"'
       ]
     },
     examples: [
-      'Learning a language is a journey that requires patience and dedication.',
-      'Every journey begins with a single step.',
-      'The journey of self-improvement never truly ends.'
+      'The journey of a thousand miles begins with a single step.',
+      'Their journey to becoming fluent speakers took several years.'
     ],
     difficulty: 2
-  },
-  'cognitive': {
-    word: 'cognitive',
-    context: 'In educational and psychological contexts, describes mental and learning processes',
-    suggestions: {
-      vocabulary: [
-        'Root word: cogn- (know, recognize)',
-        'Related words: cognition, recognize, cognizant',
-        'Antonyms: instinctive, emotional'
-      ],
-      grammar: [
-        'Adjective usage: cognitive skills',
-        'Noun form: cognition',
-        'Adverb form: cognitively'
-      ],
-      usage: [
-        'Psychological term: cognitive development',
-        'Educational field: cognitive learning strategies',
-        'Neuroscience: cognitive neuroscience'
-      ],
-      memory: [
-        'Root memory: cogn- (know) + -itive (adjective suffix)',
-        'Association memory: "Cognition" is like a computer processing information in your brain',
-        'Scene application: Using cognitive strategies when learning new knowledge'
-      ]
-    },
-    examples: [
-      'Cognitive development is crucial in early childhood.',
-      'Students need to develop strong cognitive skills.',
-      'The cognitive approach to learning emphasizes mental processes.'
-    ],
-    difficulty: 4
   }
 };
 
-export const findHighlightWords = (text: string): HighlightWord[] => {
-  const words = text.split(/\s+/);
+export function findHighlightWords(text: string): HighlightWord[] {
+  const words = text.match(/\b\w+\b/g) || [];
   const highlights: HighlightWord[] = [];
-  let currentIndex = 0;
 
   words.forEach(word => {
-    const cleanWord = word.toLowerCase().replace(/[.,!?;:'"]/g, '');
-    if (mockTranslations[cleanWord]) {
-      const startIndex = text.indexOf(word, currentIndex);
-      highlights.push({
-        word: word,
-        startIndex: startIndex,
-        endIndex: startIndex + word.length,
-        translation: mockTranslations[cleanWord]
-      });
-      currentIndex = startIndex + word.length;
+    const lowerWord = word.toLowerCase();
+    if (mockTranslations[lowerWord]) {
+      const startIndex = text.toLowerCase().indexOf(lowerWord);
+      if (startIndex !== -1) {
+        highlights.push({
+          word: word,
+          startIndex,
+          endIndex: startIndex + word.length,
+          translation: mockTranslations[lowerWord]
+        });
+      }
     }
   });
 
   return highlights;
-};
+}
 
-export const getContextAwareTranslation = (
+export function getContextAwareTranslation(
   word: string,
   context: string,
   position: number
-): TranslationEntry => {
-  const cleanWord = word.toLowerCase().replace(/[.,!?;:'"]/g, '');
-  return mockTranslations[cleanWord] || {
-    word: word,
-    basic: 'No translation',
-    intermediate: 'No detailed explanation',
-    advanced: 'No advanced explanation',
-    examples: ['No example sentence'],
-    difficulty: 1,
-    context: 'No contextual explanation'
+): TranslationEntry {
+  const lowerWord = word.toLowerCase();
+  const translation = mockTranslations[lowerWord];
+  
+  if (!translation) {
+    // Return a default translation if word not found
+    return {
+      word: word,
+      context: context.slice(Math.max(0, position - 50), position + 50),
+      translation: {
+        basic: {
+          translation: 'Translation not available',
+          examples: []
+        }
+      },
+      suggestions: {
+        vocabulary: [],
+        grammar: [],
+        usage: [],
+        memory: []
+      },
+      examples: [],
+      difficulty: 3
+    };
+  }
+
+  return {
+    ...translation,
+    context: context.slice(Math.max(0, position - 50), position + 50)
   };
-}; 
+} 

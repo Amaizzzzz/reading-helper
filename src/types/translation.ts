@@ -37,14 +37,30 @@ export interface ContextualUsage {
 export interface TranslationEntry {
   word: string;
   context: string;
-  suggestions: {
-    vocabulary: string[];    // 词汇联想
-    grammar: string[];       // 语法规则
-    usage: string[];         // 使用场景
-    memory: string[];        // 记忆技巧
+  translation: {
+    basic: {
+      translation: string;
+      examples: string[];
+    };
+    detailed?: {
+      translation: string;
+      examples: string[];
+      notes: string[];
+    };
+    technical?: {
+      translation: string;
+      examples: string[];
+      domain: string;
+    };
   };
-  examples: string[];        // 上下文例句
-  difficulty: number;        // 难度等级 1-5
+  suggestions: {
+    vocabulary: string[];
+    grammar: string[];
+    usage: string[];
+    memory: string[];
+  };
+  examples: string[];
+  difficulty: number;  // 1-5
 }
 
 export interface HighlightWord {

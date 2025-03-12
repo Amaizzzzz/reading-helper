@@ -1,170 +1,79 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { FlashcardData, StudySession, StudyProgress } from '../../types/flashcard';
-import { 
-  getDueCards, 
-  updateFlashcard, 
-  createStudySession,
-  updateStudyProgress,
-  getStudyStats
-} from '../../utils/flashcardManager';
+import React, { useState } from 'react';
+import { FlashcardData } from '../../types/flashcard';
 import Flashcard from './Flashcard';
 
 interface FlashcardDeckProps {
-  savedCards: FlashcardData[];
+  cards: FlashcardData[];
   onUpdateCard: (card: FlashcardData) => void;
-  onSessionComplete: (session: StudySession) => void;
 }
 
-const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
-  savedCards,
-  onUpdateCard,
-  onSessionComplete
-}) => {
-  const [currentSession, setCurrentSession] = useState<StudySession | null>(null);
-  const [dueCards, setDueCards] = useState<FlashcardData[]>([]);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+const FlashcardDeck: React.FC<FlashcardDeckProps> = ({ cards, onUpdateCard }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Initialize study session
-  useEffect(() => {
-    const due = getDueCards(savedCards);
-    setDueCards(due);
-    if (due.length > 0 && !currentSession) {
-      setCurrentSession(createStudySession());
-      setSessionStartTime(new Date());
-    }
-  }, [savedCards]);
-
-  const handleCardResult = (correct: boolean) => {
-    if (!currentSession || currentCardIndex >= dueCards.length) return;
-
-    const card = dueCards[currentCardIndex];
-    const updatedCard = updateFlashcard(card, correct);
+  const handleReview = (card: FlashcardData, remembered: boolean) => {
+    const updatedCard = {
+      ...card,
+      reviewCount: card.reviewCount + 1,
+      difficulty: remembered ? Math.max(1, card.difficulty - 1) : Math.min(5, card.difficulty + 1),
+      lastReviewed: new Date().toISOString(),
+      nextReview: calculateNextReview(remembered)
+    };
     onUpdateCard(updatedCard);
-
-    setCurrentSession(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        cardsStudied: prev.cardsStudied + 1,
-        correctAnswers: prev.correctAnswers + (correct ? 1 : 0),
-        incorrectAnswers: prev.incorrectAnswers + (correct ? 0 : 1)
-      };
-    });
-
-    if (currentCardIndex < dueCards.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-    } else {
-      finishSession();
-    }
-  };
-
-  const finishSession = () => {
-    if (!currentSession || !sessionStartTime) return;
-
-    const endTime = new Date();
-    const duration = Math.round((endTime.getTime() - sessionStartTime.getTime()) / 1000);
     
-    const completedSession = {
-      ...currentSession,
-      duration
-    };
-
-    onSessionComplete(completedSession);
-    setCurrentSession(null);
-    setSessionStartTime(null);
-    setCurrentCardIndex(0);
-    setDueCards([]);
+    // Move to next card if available
+    if (currentIndex < cards.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
   };
 
-  const handleAddExample = (example: string) => {
-    if (currentCardIndex >= dueCards.length) return;
-
-    const card = dueCards[currentCardIndex];
-    const updatedCard = {
-      ...card,
-      examples: [...card.examples, example]
-    };
-    onUpdateCard(updatedCard);
+  const calculateNextReview = (remembered: boolean) => {
+    const now = new Date();
+    if (remembered) {
+      // If remembered, set next review further in the future
+      now.setHours(now.getHours() + 24); // Review in 24 hours
+    } else {
+      // If difficult, review again sooner
+      now.setHours(now.getHours() + 4); // Review in 4 hours
+    }
+    return now.toISOString();
   };
 
-  const handleUpdateNotes = (notes: string) => {
-    if (currentCardIndex >= dueCards.length) return;
-
-    const card = dueCards[currentCardIndex];
-    const updatedCard = {
-      ...card,
-      notes
-    };
-    onUpdateCard(updatedCard);
-  };
-
-  if (!currentSession || dueCards.length === 0) {
+  if (cards.length === 0) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-700 mb-4">
-          No cards due for review
-        </h2>
-        <p className="text-gray-600">
-          Great job! Come back later when you have cards to review.
-        </p>
+      <div className="text-center text-gray-600 py-8">
+        No flashcards available. Add some words to your review list!
       </div>
     );
   }
 
-  const currentCard = dueCards[currentCardIndex];
-  const progress = (currentCardIndex / dueCards.length) * 100;
-
   return (
-    <div>
-      {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="h-2 bg-gray-200 rounded-full">
-          <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="mt-2 text-sm text-gray-600 text-center">
-          {currentCardIndex + 1} of {dueCards.length} cards
-        </div>
+    <div className="space-y-6">
+      <div className="text-sm text-gray-600 text-center">
+        Card {currentIndex + 1} of {cards.length}
       </div>
-
-      {/* Current Card */}
+      
       <Flashcard
-        card={currentCard}
-        onResult={handleCardResult}
-        onAddExample={handleAddExample}
-        onUpdateNotes={handleUpdateNotes}
+        key={cards[currentIndex].word}
+        card={cards[currentIndex]}
+        onReview={handleReview}
       />
 
-      {/* Session Stats */}
-      <div className="mt-6 text-center text-sm text-gray-600">
-        <div>Correct: {currentSession.correctAnswers}</div>
-        <div>Incorrect: {currentSession.incorrectAnswers}</div>
-        <div>
-          Accuracy:{' '}
-          {Math.round(
-            (currentSession.correctAnswers /
-              (currentSession.correctAnswers + currentSession.incorrectAnswers)) *
-              100 || 0
-          )}%
-        </div>
-      </div>
-
-      {/* Skip Button */}
-      <div className="mt-4 text-center">
+      <div className="flex justify-center space-x-4">
         <button
-          onClick={() => {
-            if (currentCardIndex < dueCards.length - 1) {
-              setCurrentCardIndex(currentCardIndex + 1);
-            }
-          }}
-          className="text-gray-600 hover:text-gray-800"
+          onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
+          disabled={currentIndex === 0}
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50"
         >
-          Skip for now →
+          Previous
+        </button>
+        <button
+          onClick={() => setCurrentIndex(Math.min(cards.length - 1, currentIndex + 1))}
+          disabled={currentIndex === cards.length - 1}
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50"
+        >
+          Next
         </button>
       </div>
     </div>
