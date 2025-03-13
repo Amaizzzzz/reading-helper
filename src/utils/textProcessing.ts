@@ -115,4 +115,30 @@ export function getContextAwareTranslation(
     ...translation,
     context: context.slice(Math.max(0, position - 50), position + 50)
   };
+}
+
+export async function processText(text: string): Promise<any> {
+  try {
+    const response = await fetch('/api/translate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        sourceLang: 'auto',
+        targetLang: 'English'
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Translation request failed');
+    }
+
+    const data = await response.json();
+    return data.result;
+  } catch (error) {
+    console.error('Error processing text:', error);
+    throw error;
+  }
 } 

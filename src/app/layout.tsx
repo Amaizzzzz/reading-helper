@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { SettingsProvider } from '../contexts/SettingsContext';
+import { LearningSettingsProvider } from '../contexts/LearningSettingsContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,7 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <SettingsProvider>
-          {children}
+          <LearningSettingsProvider>
+            {children}
+          </LearningSettingsProvider>
         </SettingsProvider>
       </body>
     </html>
