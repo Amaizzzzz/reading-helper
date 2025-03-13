@@ -1,40 +1,100 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-
-interface Position {
-  x: number;
-  y: number;
-}
+import React, { useState } from 'react';
+import { useLearningSettings } from '@/contexts/LearningSettingsContext';
 
 interface TranslationPopupProps {
   text: string;
-  position: Position;
+  position: {
+    x: number;
+    y: number;
+  };
+  translation: string;
+  isLoading: boolean;
   onClose: () => void;
 }
 
 const TranslationPopup: React.FC<TranslationPopupProps> = ({
   text,
   position,
+  translation,
+  isLoading,
   onClose,
 }) => {
+  const { preferences } = useLearningSettings();
   const [selectedLevel, setSelectedLevel] = useState<number>(0);
-  const [relatedWords, setRelatedWords] = useState<string[]>([]);
-
-  useEffect(() => {
-    // Simulate API call for related words
-    setRelatedWords(['similar', 'synonym', 'related', 'word']);
-  }, [text]);
 
   const levels = [
-    { title: 'Basic Definition', content: 'Simple explanation...' },
-    { title: 'Detailed Explanation', content: 'More detailed explanation...' },
-    { title: 'Technical Definition', content: 'Technical field explanation...' }
+    { title: 'Context Hints', content: 'Similar words and context clues' },
+    { title: 'Basic Translation', content: 'Simple explanation' },
+    { title: 'Detailed Translation', content: 'Comprehensive explanation' },
+    { title: 'Learning Tips', content: 'Memory aids and usage examples' }
   ];
+
+  const parseTranslation = (translation: string) => {
+    const sections: { [key: string]: string } = {};
+    
+    // Split by double newlines to separate sections
+    const parts = translation.split('\n\n').filter(Boolean);
+
+    parts.forEach(part => {
+      const lines = part.split('\n');
+      const header = lines[0].trim();
+      const content = lines.slice(1).join('\n').trim();
+
+      if (header.includes('Context Hints')) {
+        sections.context = content;
+      } else if (header.includes('Basic Translation')) {
+        sections.basic = content;
+      } else if (header.includes('Detailed Translation')) {
+        sections.detailed = content;
+      } else if (header.includes('Learning Tips')) {
+        sections.tips = content;
+      }
+    });
+
+    return sections;
+  };
+
+  const getTranslationContent = () => {
+    if (isLoading) {
+      return <div className="text-gray-500">Loading translation...</div>;
+    }
+
+    if (!translation) {
+      return <div className="text-gray-500">No translation available</div>;
+    }
+
+    const parsedSections = parseTranslation(translation);
+    let content = '';
+
+    switch (selectedLevel) {
+      case 0: // Context Hints
+        content = parsedSections.context || 'No context hints available';
+        break;
+      case 1: // Basic Translation
+        content = parsedSections.basic || 'No basic translation available';
+        break;
+      case 2: // Detailed Translation
+        content = parsedSections.detailed || 'No detailed translation available';
+        break;
+      case 3: // Learning Tips
+        content = parsedSections.tips || 'No learning tips available';
+        break;
+      default:
+        content = translation;
+    }
+
+    return (
+      <div className="text-gray-700 whitespace-pre-wrap">
+        {content}
+      </div>
+    );
+  };
 
   return (
     <div
-      className="translation-popup"
+      className="fixed bg-white rounded-lg shadow-lg p-4 max-w-sm z-50"
       style={{
         left: `${position.x}px`,
         top: `${position.y + 10}px`,
@@ -42,17 +102,24 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
       }}
     >
       <div className="flex justify-between items-center mb-3">
-        <div className="word">{text}</div>
-        <button onClick={onClose} className="close-btn">
+        <div className="font-medium text-lg break-words">{text}</div>
+        <button
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700 ml-2"
+        >
           ✕
         </button>
       </div>
 
-      <div className="translation-levels space-y-2 mb-4">
+      <div className="space-y-2 mb-4">
         {levels.map((level, index) => (
           <div
             key={index}
-            className={`level-item ${selectedLevel === index ? 'active' : ''}`}
+            className={`p-2 rounded cursor-pointer transition-colors ${
+              selectedLevel === index
+                ? 'bg-blue-50 text-blue-600'
+                : 'hover:bg-gray-50'
+            }`}
             onClick={() => setSelectedLevel(index)}
           >
             <div className="text-sm font-medium">{level.title}</div>
@@ -62,14 +129,7 @@ const TranslationPopup: React.FC<TranslationPopupProps> = ({
       </div>
 
       <div className="border-t border-gray-100 pt-4">
-        <div className="text-sm text-gray-500 mb-2">Related Words:</div>
-        <div className="flex flex-wrap gap-2">
-          {relatedWords.map((word, index) => (
-            <div key={index} className="related-word">
-              {word}
-            </div>
-          ))}
-        </div>
+        {getTranslationContent()}
       </div>
     </div>
   );

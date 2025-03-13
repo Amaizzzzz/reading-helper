@@ -14,40 +14,12 @@ const LearningSettingsContext = createContext<LearningSettingsContextType | unde
 
 export function LearningSettingsProvider({ children }: { children: React.ReactNode }) {
   const [preferences, setPreferences] = useState<UserPreferences>(getStoredPreferences());
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadPreferences = async () => {
-      try {
-        const response = await fetch('/api/preferences');
-        if (response.ok) {
-          const data = await response.json();
-          setPreferences(data);
-          updateStoredPreferences(data);
-        }
-      } catch (error) {
-        console.error('Error loading preferences:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadPreferences();
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   const updatePreferences = async (updates: Partial<UserPreferences>) => {
     try {
-      const response = await fetch('/api/preferences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      });
-
-      if (response.ok) {
-        const updated = await response.json();
-        setPreferences(updated);
-        updateStoredPreferences(updated);
-      }
+      const updated = updateStoredPreferences(updates);
+      setPreferences(updated);
     } catch (error) {
       console.error('Error updating preferences:', error);
     }
