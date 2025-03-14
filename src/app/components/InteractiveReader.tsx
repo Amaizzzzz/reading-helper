@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import TranslationPopup from './TranslationPopup';
-import { findHighlightWords, getContextAwareTranslation } from '../../utils/textProcessing';
-import { TranslationEntry, HighlightWord } from '../../types/translation';
+import { getContextAwareTranslation } from '../../utils/textProcessing';
+import { TranslationEntry } from '../../types/translation';
 import { useSettings } from '../../contexts/SettingsContext';
 
 interface Section {
@@ -22,23 +22,14 @@ const InteractiveReader: React.FC<InteractiveReaderProps> = ({ title, content, a
   const [selectedText, setSelectedText] = useState('');
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
   const [showPopup, setShowPopup] = useState(false);
-  const [highlightedWords, setHighlightedWords] = useState<HighlightWord[]>([]);
   const [currentTranslation, setCurrentTranslation] = useState<TranslationEntry | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [activeSection, setActiveSection] = useState<number>(0);
   const [inputContent, setInputContent] = useState('');
   const [isEditing, setIsEditing] = useState(!content);
 
-  // Apply settings to highlighted words
-  useEffect(() => {
-    const words = findHighlightWords(content || inputContent)
-      .filter(word => word.translation.difficulty <= settings.maxDifficulty)
-      .slice(0, Math.ceil((content || inputContent).split(' ').length * settings.highlightDensity));
-    setHighlightedWords(words);
-  }, [content, inputContent, settings.maxDifficulty, settings.highlightDensity]);
-
   // Restore last read position
-  useEffect(() => {
+  React.useEffect(() => {
     const lastPosition = userPreferences.lastReadPosition;
     if (lastPosition && lastPosition.articleId === articleId && typeof lastPosition.scrollPosition === 'number') {
       window.scrollTo(0, lastPosition.scrollPosition);
@@ -46,7 +37,7 @@ const InteractiveReader: React.FC<InteractiveReaderProps> = ({ title, content, a
   }, [articleId, userPreferences.lastReadPosition]);
 
   // Save scroll position
-  useEffect(() => {
+  React.useEffect(() => {
     const handleScroll = () => {
       if (articleId) {
         updateLastPosition(articleId, window.scrollY);
@@ -58,7 +49,7 @@ const InteractiveReader: React.FC<InteractiveReaderProps> = ({ title, content, a
   }, [articleId, updateLastPosition]);
 
   // Split content into sections on component mount or when input changes
-  useEffect(() => {
+  React.useEffect(() => {
     const textToProcess = content || inputContent;
     if (!textToProcess) return;
     
@@ -70,83 +61,76 @@ const InteractiveReader: React.FC<InteractiveReaderProps> = ({ title, content, a
     setSections(newSections);
   }, [content, inputContent]);
 
-  const handleTextSelection = useCallback(() => {
+  const handleTextSelection = useCallback(async () => {
     const selection = window.getSelection();
-    if (selection && selection.toString().trim()) {
+    if (!selection || !selection.toString().trim()) return;
+
+    try {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
-      const selectedContent = selection.toString();
+      const selectedContent = selection.toString().trim();
       
       setSelectedText(selectedContent);
       setPopupPosition({
-        x: rect.left + window.scrollX,
+        x: rect.left + (rect.width / 2) + window.scrollX,
         y: rect.bottom + window.scrollY
       });
       
-      const translation = getContextAwareTranslation(
+      // Show loading state
+      setCurrentTranslation({
+        word: selectedContent,
+        context: '',
+        translation: {
+          basic: {
+            translation: 'Loading translation...',
+            examples: []
+          }
+        },
+        suggestions: {
+          vocabulary: [],
+          grammar: [],
+          usage: [],
+          memory: []
+        },
+        examples: [],
+        difficulty: 3
+      });
+      setShowPopup(true);
+      
+      const translation = await getContextAwareTranslation(
         selectedContent,
-        content,
-        content.indexOf(selectedContent)
+        content || inputContent || '',
+        (content || inputContent || '').indexOf(selectedContent)
       );
       setCurrentTranslation(translation);
-      setShowPopup(true);
+    } catch (error) {
+      console.error('Error getting translation:', error);
+      setCurrentTranslation({
+        word: selectedText,
+        context: '',
+        translation: {
+          basic: {
+            translation: 'Failed to load translation. Please try again.',
+            examples: []
+          }
+        },
+        suggestions: {
+          vocabulary: [],
+          grammar: [],
+          usage: [],
+          memory: []
+        },
+        examples: [],
+        difficulty: 3
+      });
     }
-  }, [content]);
+  }, [content, inputContent, selectedText]);
 
   const handleSubmitContent = () => {
     if (inputContent.trim()) {
       setIsEditing(false);
       setActiveSection(0);
     }
-  };
-
-  const renderContent = (sectionContent: string) => {
-    if (highlightedWords.length === 0) return sectionContent;
-
-    let lastIndex = 0;
-    const elements: JSX.Element[] = [];
-
-    highlightedWords.forEach((highlight, index) => {
-      if (highlight.startIndex > lastIndex) {
-        elements.push(
-          <span key={`text-${index}`}>
-            {sectionContent.slice(lastIndex, highlight.startIndex)}
-          </span>
-        );
-      }
-
-      elements.push(
-        <span
-          key={`highlight-${index}`}
-          className="cursor-pointer bg-yellow-100/80 hover:bg-yellow-200/80 transition-colors px-0.5 rounded"
-          onClick={(e) => {
-            e.preventDefault();
-            setSelectedText(highlight.word);
-            const rect = e.currentTarget.getBoundingClientRect();
-            setPopupPosition({
-              x: rect.left + window.scrollX,
-              y: rect.bottom + window.scrollY
-            });
-            setCurrentTranslation(highlight.translation);
-            setShowPopup(true);
-          }}
-        >
-          {highlight.word}
-        </span>
-      );
-
-      lastIndex = highlight.endIndex;
-    });
-
-    if (lastIndex < sectionContent.length) {
-      elements.push(
-        <span key="text-end">
-          {sectionContent.slice(lastIndex)}
-        </span>
-      );
-    }
-
-    return elements;
   };
 
   return (
@@ -210,7 +194,7 @@ const InteractiveReader: React.FC<InteractiveReaderProps> = ({ title, content, a
             </h1>
           </div>
           <div 
-            className="px-8 py-6"
+            className="px-8 py-6 select-text"
             onMouseUp={handleTextSelection}
             style={{ 
               fontSize: `${settings.fontSize}px`,
@@ -218,7 +202,7 @@ const InteractiveReader: React.FC<InteractiveReaderProps> = ({ title, content, a
               color: '#374151'
             }}
           >
-            {sections[activeSection] && renderContent(sections[activeSection].content)}
+            {sections[activeSection]?.content}
           </div>
         </div>
       )}
@@ -228,6 +212,7 @@ const InteractiveReader: React.FC<InteractiveReaderProps> = ({ title, content, a
           text={selectedText}
           position={popupPosition}
           onClose={() => setShowPopup(false)}
+          translation={currentTranslation}
         />
       )}
     </div>
