@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能语言学习助手</title>
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --tertiary-color: #fbbc05;
+            --dark-color: #333;
+            --light-color: #f8f9fa;
+            --gray-color: #e0e0e0;
+            --highlight-color: #ffeb3b;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray-color);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 20px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 30px;
+        }
+        
+        .reading-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .article-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+        
+        .article-content {
+            line-height: 1.8;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        
+        .article-content p {
+            margin-bottom: 15px;
+        }
+        
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 2px 0;
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .translation-popup {
+            position: absolute;
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 15px;
+            z-index: 100;
+            top: 30px;
+            left: 0;
+            display: none;
+        }
+        
+        .translation-popup.active {
+            display: block;
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .word {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .translation-levels {
+            margin-bottom: 15px;
+        }
+        
+        .level-item {
+            padding: 8px 10px;
+            background-color: var(--light-color);
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .level-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .translation-content {
+            margin-top: 15px;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .adjustment-panel, .flashcards-panel, .chat-panel {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .slider-container {
+            margin-bottom: 20px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 5px;
+            background: var(--gray-color);
+            outline: none;
+            -webkit-appearance: none;
+            border-radius: 5px;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .flashcard {
+            background-color: var(--light-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .flashcard-front {
+            font-weight: 500;
+        }
+        
+        .flashcard-back {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--gray-color);
+            display: none;
+        }
+        
+        .chat-input {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--gray-color);
+            border-radius: 5px 0 0 5px;
+            outline: none;
+        }
+        
+        .chat-input button {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+        
+        .related-words {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .related-word {
+            background-color: var(--light-color);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .chat-messages {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        
+        .message {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 15px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            margin-left: auto;
+            border-radius: 15px 15px 0 15px;
+        }
+        
+        .bot-message {
+            background-color: var(--light-color);
+            border-radius: 15px 15px 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">语境学习助手</div>
+            <nav>
+                <ul>
+                    <li><a href="#">首页</a></li>
+                    <li><a href="#">我的学习</a></li>
+                    <li><a href="#">错题集</a></li>
+                    <li><a href="#">设置</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <div class="main-content">
+            <main class="reading-section">
+                <h1 class="article-title">人工智能的未来发展</h1>
+                <div class="article-content">
+                    <p>近年来，人工智能技术的<span class="highlight" id="word1">飞速发展</span>引起了全球范围内的广泛关注。从语言模型到计算机视觉，从自动驾驶到医疗诊断，人工智能正在各个领域展现出<span class="highlight" id="word2">前所未有</span>的潜力。</p>
+                    
+                    <p>大型语言模型（LLMs）的<span class="highlight" id="word3">出现</span>使机器能够理解和生成人类语言，这为人机交互带来了革命性的变化。这些模型通过<span class="highlight" id="word4">分析</span>海量文本数据，学习语言的规律和知识，从而能够进行自然、连贯的对话，甚至创作内容。</p>
+                    
+                    <p>然而，人工智能的发展也面临着诸多<span class="highlight" id="word5">挑战</span>。首先是伦理问题：如何确保AI系统的决策公平、透明且符合人类价值观？其次是安全问题：如何防止AI被<span class="highlight" id="word6">滥用</span>或失控？此外，随着AI技术的普及，社会也需要应对就业结构的变化和新型不平等的出现。</p>
+                    
+                    <p>展望未来，人工智能将继续<span class="highlight" id="word7">深刻改变</span>我们的生活和工作方式。专家预测，在未来十年内，我们可能会看到通用人工智能（AGI）的雏形，即具有与人类相当的认知能力的系统。尽管目前这仍是科幻小说的<span class="highlight" id="word8">领域</span>，但技术的进步速度往往超出我们的想象。</p>
+                </div>
+            </main>
+            
+            <aside class="sidebar">
+                <div class="adjustment-panel">
+                    <h3 class="panel-title">学习辅助调节</h3>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>提示级别</span>
+                            <span>低 - 高</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="slider" id="hintSlider">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>翻译详细度</span>
+                            <span>简洁 - 详细</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="slider" id="translationSlider">
+                    </div>
+                </div>
+                
+                <div class="flashcards-panel">
+                    <h3 class="panel-title">我的错题集</h3>
+                    <div class="flashcard">
+                        <div class="flashcard-front">前所未有</div>
+                        <div class="flashcard-back">
+                            unprecedented: 史无前例的，从未有过的
+                            <div class="context">例句：This technology shows unprecedented potential.</div>
+                        </div>
+                    </div>
+                    <div class="flashcard">
+                        <div class="flashcard-front">滥用</div>
+                        <div class="flashcard-back">
+                            abuse: 滥用，误用，虐待
+                            <div class="context">例句：We must prevent the abuse of this powerful technology.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-panel">
+                    <h3 class="panel-title">AI语言助手</h3>
+                    <div class="chat-messages">
+                        <div class="message bot-message">有什么我可以帮助你理解的吗？</div>
+                        <div class="message user-message">解释一下"深刻改变"在文章中的含义</div>
+                        <div class="message bot-message">在这篇文章中，"深刻改变"指的是人工智能将对我们的生活和工作方式产生根本性、全面性的转变，而不仅仅是表面的影响。</div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="输入问题...">
+                        <button>发送</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+    
+    <!-- Translation Popup Template -->
+    <div class="translation-popup" id="translationPopup">
+        <div class="popup-header">
+            <div class="word" id="popupWord">飞速发展</div>
+            <button class="close-btn">&times;</button>
+        </div>
+        
+        <div class="translation-levels">
+            <div class="level-item active" data-level="1">词性提示</div>
+            <div class="level-item" data-level="2">基础释义</div>
+            <div class="level-item" data-level="3">详细翻译</div>
+            <div class="level-item" data-level="4">语境分析</div>
+        </div>
+        
+        <div class="translation-content" id="translationContent">
+            <p>名词短语：描述发展的速度特点</p>
+            
+            <div class="translation-detail" style="display:none;">
+                <p><strong>基础释义：</strong> rapid development</p>
+            </div>
+            
+            <div class="translation-full" style="display:none;">
+                <p><strong>详细翻译：</strong> rapid development / lightning-fast advancement</p>
+                <p>表示发展速度极快，像飞一样迅速</p>
+            </div>
+            
+            <div class="translation-context" style="display:none;">
+                <p><strong>语境分析：</strong> 在文章中，"飞速发展"强调了人工智能技术近年来发展非常迅猛，速度之快令人惊叹，暗示了技术变革的加速度特性。</p>
+            </div>
+        </div>
+        
+        <div class="related-words">
+            <div class="related-word">迅猛发展</div>
+            <div class="related-word">突飞猛进</div>
+            <div class="related-word">快速增长</div>
+        </div>
+    </div>
+    
+    <script>
+        // Simplified JS for prototype demonstration
+        document.addEventListener('DOMContentLoaded', function() {
+            const highlightWords = document.querySelectorAll('.highlight');
+            const popup = document.getElementById('translationPopup');
+            const closeBtn = document.querySelector('.close-btn');
+            const popupWord = document.getElementById('popupWord');
+            const levelItems = document.querySelectorAll('.level-item');
+            const flashcards = document.querySelectorAll('.flashcard');
+            
+            // Show popup when clicking highlighted word
+            highlightWords.forEach(word => {
+                word.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    popupWord.textContent = this.textContent;
+                    
+                    // Position the popup
+                    const rect = this.getBoundingClientRect();
+                    popup.style.left = `${rect.left}px`;
+                    popup.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                    
+                    // Make sure popup doesn't go off-screen
+                    const rightEdge = rect.left + 300;
+                    if (rightEdge > window.innerWidth) {
+                        popup.style.left = `${window.innerWidth - 310}px`;
+                    }
+                    
+                    popup.classList.add('active');
+                });
+            });
+            
+            // Close popup on close button click
+            closeBtn.addEventListener('click', function() {
+                popup.classList.remove('active');
+            });
+            
+            // Close popup when clicking elsewhere
+            document.addEventListener('click', function(e) {
+                if (!popup.contains(e.target) && !e.target.classList.contains('highlight')) {
+                    popup.classList.remove('active');
+                }
+            });
+            
+            // Toggle between translation levels
+            levelItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    levelItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // In a real implementation, this would show different content
+                    // For prototype, we'll just add a console log
+                    console.log(`Switched to level: ${this.dataset.level}`);
+                });
+            });
+            
+            // Toggle flashcard content
+            flashcards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const back = this.querySelector('.flashcard-back');
+                    if (back.style.display === 'block') {
+                        back.style.display = 'none';
+                    } else {
+                        back.style.display = 'block';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
