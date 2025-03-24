@@ -34,27 +34,27 @@ export default function ReadingList() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-[1200px] mx-auto">
         <div className="flex justify-between items-center mb-6">
           <Link 
             href="/"
-            className="text-blue-600 hover:text-blue-800"
+            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           >
             ← Back to Home
           </Link>
-          <h1 className="text-2xl font-bold">Reading List</h1>
+          <h1 className="text-2xl font-bold dark:text-white">Reading List</h1>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="space-y-4">
             {articles.map((article) => (
               <Link 
                 key={article.id}
                 href={`/article/${article.id}`}
-                className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="block p-4 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                <h2 className="text-lg font-medium">{article.title}</h2>
-                <div className="flex items-center text-sm text-gray-600 mt-2 space-x-4">
+                <h2 className="text-lg font-medium dark:text-white">{article.title}</h2>
+                <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mt-2 space-x-4">
                   <span>{article.author}</span>
                   <span>•</span>
                   <span>{article.date}</span>
