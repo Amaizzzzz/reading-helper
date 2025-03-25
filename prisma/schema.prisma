@@ -14,4 +14,33 @@ model UserPreferences {
   translationDetail Int     @default(50)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+model Flashcard {
+  id          String         @id @default(uuid())
+  word        String
+  userId      String         // For future user authentication
+  translations Translation[]
+  reviews     ReviewHistory[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Translation {
+  id          String    @id @default(uuid())
+  text        String
+  language    String    // e.g., "en", "es", "fr"
+  flashcardId String
+  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ReviewHistory {
+  id          String    @id @default(uuid())
+  flashcardId String
+  flashcard   Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+  userId      String    // For future user authentication
+  status      String    // "correct", "incorrect", "hint_used"
+  reviewedAt  DateTime  @default(now())
 } 
