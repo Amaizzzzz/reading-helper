@@ -6,6 +6,12 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 240, 245, 255;
   --background-end-rgb: 235, 240, 255;
+  --font-size-small: 0.875rem;
+  --font-size-medium: 1rem;
+  --font-size-large: 1.125rem;
+  --line-spacing-compact: 1.25;
+  --line-spacing-normal: 1.5;
+  --line-spacing-relaxed: 1.75;
 }
 
 @layer base {
@@ -410,4 +416,56 @@ body {
            shadow-lg backdrop-blur-sm
            whitespace-nowrap z-50;
   }
+}
+
+/* Dark mode styles */
+.dark {
+  color-scheme: dark;
+}
+
+/* Font size classes */
+.text-small {
+  font-size: var(--font-size-small) !important;
+}
+
+.text-medium {
+  font-size: var(--font-size-medium) !important;
+}
+
+.text-large {
+  font-size: var(--font-size-large) !important;
+}
+
+/* Line spacing classes */
+.leading-compact {
+  line-height: var(--line-spacing-compact) !important;
+}
+
+.leading-normal {
+  line-height: var(--line-spacing-normal) !important;
+}
+
+.leading-relaxed {
+  line-height: var(--line-spacing-relaxed) !important;
+}
+
+/* Apply settings to article content */
+.article-content {
+  @apply text-medium leading-normal;
+}
+
+.article-content.text-small {
+  font-size: var(--font-size-small) !important;
+}
+
+.article-content.text-large {
+  font-size: var(--font-size-large) !important;
+}
+
+.article-content.leading-compact {
+  line-height: var(--line-spacing-compact) !important;
+}
+
+.article-content.leading-relaxed {
+  line-height: var(--line-spacing-relaxed) !important;
 } 
