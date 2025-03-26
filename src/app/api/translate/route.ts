@@ -173,101 +173,73 @@ function parseOpenAIResponse(response: string, hintLevel: number, detailLevel: n
 
 export async function POST(request: Request) {
   try {
-    console.log('API Key available:', !!process.env.OPENAI_API_KEY);
+    console.log('=== TRANSLATION API CALLED ===');
     const { text, sourceLang, targetLang, hintLevel = 3, translationDetail = 3 } = await request.json();
     
-    console.log('Translation request received:', { text, sourceLang, targetLang, hintLevel, translationDetail });
-
     if (!text) {
-      return NextResponse.json(
-        { error: 'Text is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
-    // Normalize levels to 1-5 range
-    const normalizedHintLevel = Math.max(1, Math.min(5, Math.round(hintLevel)));
-    const normalizedDetailLevel = Math.max(1, Math.min(5, Math.round(translationDetail)));
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: 'OpenAI API key is not configured' }, { status: 500 });
+    }
 
     try {
-      console.log('Sending request to OpenAI...');
       const completion = await openai.chat.completions.create({
         messages: [
           {
             role: "system",
-            content: `You are a language learning assistant. Provide translations based on the specified hint and detail levels. Format your response with clear headers and bullet points. ALWAYS start with the direct translation (or hint based on level) on the first line after "Translation:"`
+            content: `You are a language learning assistant. Provide translations and explanations in a clear, structured format. Include basic translation, detailed explanation, technical information, related words, grammar notes, and usage tips.`
           },
           {
             role: "user",
-            content: `Translate this text: "${text}"
+            content: `Translate and explain this text: "${text}"
 Source Language: ${sourceLang || 'auto-detect'}
 Target Language: ${targetLang || 'English'}
 
-Hint Level: ${normalizedHintLevel}/5 (${getHintLevel(normalizedHintLevel)})
-Detail Level: ${normalizedDetailLevel}/5 (${getDetailLevel(normalizedDetailLevel)})
-
-Format your response as follows:
+Please provide the information in this exact format:
 
 Translation:
-<TRANSLATION HERE>
+[Basic translation of the word/phrase]
 
-${normalizedDetailLevel >= 2 ? `Examples:
-• Example 1
-• Example 2` : ''}
+Detailed:
+[Translation with context]
+[Brief explanation of meaning and usage]
 
-${normalizedDetailLevel >= 3 ? `Related Words:
-• Related word 1
-• Related word 2` : ''}
+Technical:
+[Technical or formal translation if applicable]
+[Domain or field where this term is commonly used]
 
-${normalizedDetailLevel >= 4 ? `Grammar Notes:
-• Grammar note 1
-• Grammar note 2
+Related Words:
+• [Related word or synonym 1]
+• [Related word or synonym 2]
+• [Related word or synonym 3]
+
+Grammar Notes:
+• [Grammar point 1]
+• [Grammar point 2]
 
 Usage Tips:
-• Usage tip 1
-• Usage tip 2` : ''}
-
-For hint level ${normalizedHintLevel}:
-${normalizedHintLevel === 1 ? '- Give ONLY indirect hints and etymology. NO direct translation.' : ''}
-${normalizedHintLevel === 2 ? '- Provide context clues and synonyms.' : ''}
-${normalizedHintLevel === 3 ? '- Give a basic translation.' : ''}
-${normalizedHintLevel === 4 ? '- Provide clear translation with context.' : ''}
-${normalizedHintLevel === 5 ? '- Give comprehensive translation with explanations.' : ''}`
+• [Usage tip 1]
+• [Usage tip 2]`
           }
         ],
         model: "gpt-4",
-        temperature: 0.3, // Lower temperature for more consistent formatting
+        temperature: 0.3,
       });
 
-      console.log('Received response from OpenAI');
       const response = completion.choices[0].message.content || '';
       console.log('OpenAI response:', response);
-      
-      // First try to get the translation directly
-      let translation = '';
-      const lines = response.split('\n');
-      const translationIndex = lines.findIndex(line => 
-        line.toLowerCase().trim() === 'translation:');
-      
-      if (translationIndex !== -1 && translationIndex + 1 < lines.length) {
-        translation = lines[translationIndex + 1].trim();
-      }
 
-      // If no translation found, try parsing the whole response
-      if (!translation) {
-        const parsedResponse = parseOpenAIResponse(response, normalizedHintLevel, normalizedDetailLevel);
-        translation = parsedResponse.translation.basic.translation;
-      }
-
-      // Create the full result
+      // Parse the response into sections
+      const sections = response.split('\n\n');
       const result: TranslationEntry = {
         word: text,
         context: '',
         translation: {
-          basic: {
-            translation: translation || 'Translation not available',
-            examples: []
-          }
+          basic: { translation: '', examples: [] },
+          detailed: { translation: '', examples: [], notes: [] },
+          technical: { translation: '', examples: [], domain: '' }
         },
         suggestions: {
           vocabulary: [],
@@ -276,30 +248,59 @@ ${normalizedHintLevel === 5 ? '- Give comprehensive translation with explanation
           memory: []
         },
         examples: [],
-        difficulty: Math.min(5, Math.max(1, Math.round((normalizedHintLevel + normalizedDetailLevel) / 2)))
+        difficulty: 3
       };
 
-      // Parse additional details if needed
-      if (normalizedDetailLevel > 1) {
-        const parsedResponse = parseOpenAIResponse(response, normalizedHintLevel, normalizedDetailLevel);
-        result.examples = parsedResponse.examples;
-        result.suggestions = parsedResponse.suggestions;
-        if (normalizedDetailLevel >= 3) {
-          result.translation.detailed = parsedResponse.translation.detailed;
-        }
-        if (normalizedDetailLevel >= 5) {
-          result.translation.technical = parsedResponse.translation.technical;
-        }
-      }
+      sections.forEach(section => {
+        const lines = section.trim().split('\n');
+        const title = lines[0].toLowerCase();
+        const content = lines.slice(1).map(line => line.trim().replace(/^[•\-*]\s*/, ''));
 
-      console.log('Sending response:', result);
-      return NextResponse.json({
-        result,
-        preferences: {
-          hintLevel: normalizedHintLevel,
-          translationDetail: normalizedDetailLevel
+        if (title.startsWith('translation:')) {
+          result.translation.basic.translation = content[0] || '';
+        }
+        else if (title.startsWith('detailed:')) {
+          const detailed = result.translation.detailed;
+          if (detailed) {
+            detailed.translation = content[0] || '';
+            detailed.notes = content.slice(1);
+          }
+        }
+        else if (title.startsWith('technical:')) {
+          const technical = result.translation.technical;
+          if (technical) {
+            technical.translation = content[0] || '';
+            technical.domain = content[1] || 'general';
+          }
+        }
+        else if (title.startsWith('related words:')) {
+          const suggestions = result.suggestions;
+          if (suggestions) {
+            suggestions.vocabulary = content;
+          }
+        }
+        else if (title.startsWith('grammar notes:')) {
+          const suggestions = result.suggestions;
+          if (suggestions) {
+            suggestions.grammar = content;
+          }
+        }
+        else if (title.startsWith('usage tips:')) {
+          const suggestions = result.suggestions;
+          if (suggestions) {
+            suggestions.usage = content;
+          }
         }
       });
+
+      // Ensure we have at least basic translation
+      if (!result.translation.basic.translation) {
+        result.translation.basic.translation = text;
+      }
+
+      console.log('Parsed result:', result);
+      return NextResponse.json({ result });
+
     } catch (error) {
       console.error('OpenAI API error:', error);
       return NextResponse.json(
