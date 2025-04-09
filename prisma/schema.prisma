@@ -17,13 +17,28 @@ model UserPreferences {
 }
 
 model Flashcard {
-  id          String         @id @default(uuid())
-  word        String
-  userId      String         // For future user authentication
-  translations Translation[]
-  reviews     ReviewHistory[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id            String   @id @default(cuid())
+  userId        String
+  word          String
+  directTranslation String
+  translation   Json?
+  difficulty    Int      @default(3)
+  reviewCount   Int      @default(0)
+  correctStreak Int      @default(0)
+  lastReviewed  DateTime?
+  nextReview    DateTime?
+  dateAdded     DateTime @default(now())
+  status        String   @default("active")
+  masteryLevel  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  translations  Translation[]
+  reviews       ReviewHistory[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([nextReview])
+  @@unique([userId, word])
 }
 
 model Translation {
@@ -43,4 +58,15 @@ model ReviewHistory {
   userId      String    // For future user authentication
   status      String    // "correct", "incorrect", "hint_used"
   reviewedAt  DateTime  @default(now())
+}
+
+model ReadingList {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 } 
