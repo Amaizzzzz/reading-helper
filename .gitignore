@@ -59,4 +59,7 @@ Thumbs.db
 
 # Logs
 logs
-*.log 
+*.log
+
+# Next.js SWC binary
+node_modules/@next/swc-darwin-arm64/next-swc.darwin-arm64.node 
